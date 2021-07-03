@@ -11,6 +11,7 @@ typedef struct	s_tab
 	int				die;
 	int				eat;
 	int				sleep;
+	int				times;
 	pthread_mutex_t *mut;
 	pthread_t		*thread;
 }	t_tab;

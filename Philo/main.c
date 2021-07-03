@@ -18,7 +18,7 @@ int ft_num(char *num)
 	i = 0;
 	while (*num >= '0' && *num <= '9')
 	{
-		i = i * 10 + *num;
+		i = (i * 10) + (*num - '0');
 		num++;
 	}
 	if (*num)
@@ -34,13 +34,19 @@ void parse_param(t_tab *par, char **argv)
 	par->sleep = ft_num(argv[4]);
 	if (par->phil < 1 || par->sleep < 1 || par->eat < 1 || par->die < 1)
 		ft_error("Error: Wrong arguments");
+	if (argv[5])
+		par->times = ft_num(argv[5]);
+	else
+		par->times = -1;
+	if (argv[5] && par->times < 1)
+		ft_error("Error: Wrong arguments");
 }
 
 int philo(int argc, char **argv) // main
 {
 	t_tab par;
 
-	if (argc != 5)
+	if (argc < 5 || argc > 6)
 		ft_error("Error: Wrong number of arguments");
 	parse_param(&par, argv);
 	start_phil(&par);
@@ -58,7 +64,7 @@ int main() // del
 	real_time = msec_c() - real_time;
 	printf("%ld\n", real_time);
 
-	char *argv[] = {"phil", "5", "800", "200", "200"};
+	char *argv[] = {"phil", "5", "800", "200", "200", NULL};
 	philo(5, argv);
 	return 0;
 }
