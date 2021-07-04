@@ -21,34 +21,57 @@ int ft_num(char *num)
 		i = (i * 10) + (*num - '0');
 		num++;
 	}
-	if (*num)
-		i = -1;
+	if (*num || !i)
+		ft_error("Error: Wrong arguments");
 	return(i);
 }
 
-void parse_param(t_tab *par, char **argv)
+void init_phil(t_info *par, int i)
 {
-	par->phil = ft_num(argv[1]);
-	par->die = ft_num(argv[2]);
-	par->eat = ft_num(argv[3]);
-	par->sleep = ft_num(argv[4]);
-	if (par->phil < 1 || par->sleep < 1 || par->eat < 1 || par->die < 1)
-		ft_error("Error: Wrong arguments");
-	if (argv[5])
-		par->times = ft_num(argv[5]);
+	//		par->each[i].info = par; // + structure
+	par->each[i].name = i + 1;
+	par->each[i].die = ft_num(par->av[2]);
+	par->each[i].eat = ft_num(par->av[3]);
+	par->each[i].sleep = ft_num(par->av[4]);
+	par->each[i].times = 0;
+	if (par->ac == 6)
+		par->each[i].times = ft_num(par->av[5]);
+	pthread_mutex_init(par->forks + i, NULL);
+	par->each[i].left = par->forks + i;
+	if (par->p_num != i + 1)
+		par->each[i].right = par->forks + i + 1;
 	else
-		par->times = -1;
-	if (argv[5] && par->times < 1)
-		ft_error("Error: Wrong arguments");
+		par->each[i].right = par->forks;
+}
+
+void parse_param(t_info *par, char **argv, int argc)
+{
+	int i;
+
+	i = -1;
+	if (argc < 5 || argc > 6)
+		ft_error("Error: Wrong number of arguments");
+	par->p_num = ft_num(argv[1]);
+	par->ac = argc;
+	par->av = argv;
+
+	// can be dif - ft_malloc
+	par->each = (t_phil *)malloc(sizeof(t_phil) * par->p_num);
+	par->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * par->p_num);
+	par->check = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * par->p_num);
+
+	if (!par->each || !par->forks || !par->check)
+		ft_error("Error: malloc");
+	while (par->p_num > ++i)
+		init_phil(par, i);
+
 }
 
 int philo(int argc, char **argv) // main
 {
-	t_tab par;
+	t_info par;
 
-	if (argc < 5 || argc > 6)
-		ft_error("Error: Wrong number of arguments");
-	parse_param(&par, argv);
+	parse_param(&par, argv, argc);
 	start_phil(&par);
 	return 0;
 }
@@ -64,7 +87,7 @@ int main() // del
 	real_time = msec_c() - real_time;
 	printf("%ld\n", real_time);
 
-	char *argv[] = {"phil", "5", "800", "200", "200", NULL};
-	philo(5, argv);
+	char *argv[] = {"phil", "5", "800", "200", "200", "2"};
+	philo(6, argv);
 	return 0;
 }

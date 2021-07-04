@@ -1,52 +1,54 @@
 #include "philo.h"
 
-void	sleeping(t_tab *par)
+void	slee(t_phil *phil)
 {
-	printf("sleeping!\n");
+	printf("Philo N%d sleeping thread = %p\n", phil->name, &phil->thread);
+	usleep(phil->sleep*10000);
 }
 
-void	eat(t_tab *par)
+void	eat(t_phil *phil)
 {
-	printf("eat!\n");
-	usleep(par->eat*1000);
+	printf("Philo N%d eating\n", phil->name);
+	usleep(phil->eat*1000);
 }
 
-void	think(t_tab *par)
+void	think(t_phil *phil)
 {
-	printf("think!\n");
+	printf("Philo N%d thinking\n", phil->name);
 }
 
 void	*routine(void *some)
 {
-	t_tab	*par;
+	t_phil	*phil;
+	int		i;
 
-	par = (t_tab *)some;
-	while (1)
+	phil = (t_phil *)some;
+	i = 1;
+	if (phil->times)
 	{
-		think(par);
-		sleeping(par);
-		eat(par);
+		i = phil->times;
+		phil->times = 1;
 	}
-//	printf("Tread!\n");
+	while (i)
+	{
+		think(phil);
+		eat(phil);
+		slee(phil);
+		i -= phil->times;
+	}
 	return NULL;
 }
 
-void	start_phil(t_tab *par)
+void	start_phil(t_info *par)
 {
 	int	i;
 
-	i = 0;
-	par->thread = (pthread_t *)malloc(sizeof(pthread_t) * (par->phil + 1)); // +1 ?
-	par->mut = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * (par->phil + 1)); // +1 ?
-	if (!(par->thread) || !(par->mut))
-		ft_error("Error: malloc");
-	while(par->phil > i)
+	i = -1;
+	while(par->p_num > ++i)
 	{
-		//usleep(500); // ?
-		if (pthread_create((par->thread) + i, NULL, &routine, (void *)par))
+		if (pthread_create(&par->each[i].thread, NULL, &routine, (void *)(par->each + i)))
 			ft_error("Error: pthread_create");
-		if (pthread_join(par->thread[i], NULL))
+		if (pthread_join(par->each[i].thread, NULL))
 			ft_error("Error: pthread_join");
-		i++;
 	}
 }

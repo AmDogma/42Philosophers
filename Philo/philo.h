@@ -5,17 +5,29 @@
 #include <sys/time.h>
 #include <pthread.h>
 
-typedef struct	s_tab
+typedef struct	s_phil
 {
-	int				phil;
+	int				name;
 	int				die;
 	int				eat;
 	int				sleep;
 	int				times;
-	pthread_mutex_t *mut;
-	pthread_t		*thread;
-}	t_tab;
+	pthread_mutex_t *left;
+	pthread_mutex_t *right;
+	pthread_t		thread;
+//	struct s_info	*info;
+}	t_phil;
+
+typedef struct	s_info
+{
+	int				p_num;
+	int				ac;
+	char			**av;
+	pthread_mutex_t *check;
+	pthread_mutex_t *forks;
+	t_phil			*each;
+}	t_info;
 
 void			ft_error(char *message);
 unsigned long	msec_c(void);
-void			start_phil(t_tab *par);
+void			start_phil(t_info *par);
