@@ -48,7 +48,9 @@ void	start_phil(t_info *par)
 	{
 		if (pthread_create(&par->each[i].thread, NULL, &routine, (void *)(par->each + i)))
 			ft_error("Error: pthread_create");
-		if (pthread_join(par->each[i].thread, NULL))
+		if (pthread_detach(par->each[i].thread))
 			ft_error("Error: pthread_join");
+//		if (pthread_join(par->each[i].thread, NULL))
+//			ft_error("Error: pthread_join"); // понять как их отпустить и чтобы программа не закончилась
 	}
 }
