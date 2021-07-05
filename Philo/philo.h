@@ -12,6 +12,8 @@ typedef struct	s_phil
 	int				eat;
 	int				sleep;
 	int				times;
+	int				prior;
+	unsigned long	timer;
 	pthread_mutex_t *left;
 	pthread_mutex_t *right;
 	pthread_t		thread;

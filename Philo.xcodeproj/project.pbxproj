@@ -11,6 +11,7 @@
 		241C4CC2268FA48200E156FA /* start.c in Sources */ = {isa = PBXBuildFile; fileRef = 241C4CC1268FA48200E156FA /* start.c */; };
 		242BAEEA268E52C400F4BBEE /* time.c in Sources */ = {isa = PBXBuildFile; fileRef = 242BAEE9268E52C400F4BBEE /* time.c */; };
 		242BAEF1268E564700F4BBEE /* philo.h in Sources */ = {isa = PBXBuildFile; fileRef = 242BAEF0268E564700F4BBEE /* philo.h */; };
+		245194B12693942D00AE1942 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 245194B02693942D00AE1942 /* utils.c */; };
 		2475496B26921FF200ED26FA /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 2475496A26921FF200ED26FA /* Makefile */; };
 /* End PBXBuildFile section */
 
@@ -32,6 +33,7 @@
 		242BAEE6268E52C400F4BBEE /* Philo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Philo; sourceTree = BUILT_PRODUCTS_DIR; };
 		242BAEE9268E52C400F4BBEE /* time.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = time.c; sourceTree = "<group>"; };
 		242BAEF0268E564700F4BBEE /* philo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = philo.h; sourceTree = "<group>"; };
+		245194B02693942D00AE1942 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		2475496A26921FF200ED26FA /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -68,6 +70,7 @@
 				242BAEF0268E564700F4BBEE /* philo.h */,
 				241C4CBF268F715C00E156FA /* main.c */,
 				241C4CC1268FA48200E156FA /* start.c */,
+				245194B02693942D00AE1942 /* utils.c */,
 				2475496A26921FF200ED26FA /* Makefile */,
 				242BAEE9268E52C400F4BBEE /* time.c */,
 			);
@@ -131,6 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				245194B12693942D00AE1942 /* utils.c in Sources */,
 				2475496B26921FF200ED26FA /* Makefile in Sources */,
 				241C4CC2268FA48200E156FA /* start.c in Sources */,
 				242BAEF1268E564700F4BBEE /* philo.h in Sources */,

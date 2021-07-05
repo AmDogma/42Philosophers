@@ -78,16 +78,7 @@ int philo(int argc, char **argv) // main
 
 int main() // del
 {
-	unsigned long real_time;
-
-	real_time = msec_c();
-	printf("%ld\n", real_time);
-	usleep(200*1000);
-
-	real_time = msec_c() - real_time;
-	printf("%ld\n", real_time);
-
-	char *argv[] = {"phil", "5", "800", "200", "200", "2"};
+	char *argv[] = {"phil", "4", "420", "200", "200", "22"};
 	philo(6, argv);
 	return 0;
 }
