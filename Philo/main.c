@@ -8,7 +8,7 @@ void	ft_error(char *message)
 	while (message + i && message[i] != '\0')
 		write(1, (message + i++), 1);
 	write(1, "\n", 1);
-	exit (-1);
+	exit (-1); // нельзя
 }
 
 int ft_num(char *num)
@@ -30,10 +30,12 @@ void init_phil(t_info *par, int i)
 {
 	//		par->each[i].info = par; // + structure
 	par->each[i].name = i + 1;
+	par->each[i].check = &par->check;
 	par->each[i].die = ft_num(par->av[2]);
 	par->each[i].eat = ft_num(par->av[3]);
 	par->each[i].sleep = ft_num(par->av[4]);
 	par->each[i].times = 0;
+	par->each[i].begin = par->begin;
 	if (par->ac == 6)
 		par->each[i].times = ft_num(par->av[5]);
 	pthread_mutex_init(par->forks + i, NULL);
@@ -55,13 +57,15 @@ void parse_param(t_info *par, char **argv, int argc)
 	par->ac = argc;
 	par->av = argv;
 
-	// can be dif - ft_malloc
+	// можно замолочить в мейне и выход будет прост
+
 	par->each = (t_phil *)malloc(sizeof(t_phil) * par->p_num);
 	par->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * par->p_num);
-	par->check = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * par->p_num);
-
-	if (!par->each || !par->forks || !par->check)
+	if (!par->each || !par->forks)
 		ft_error("Error: malloc");
+
+	pthread_mutex_init(&par->check, NULL);
+	par->begin = msec_c();
 	while (par->p_num > ++i)
 		init_phil(par, i);
 
@@ -70,7 +74,6 @@ void parse_param(t_info *par, char **argv, int argc)
 int philo(int argc, char **argv) // main
 {
 	t_info par;
-
 	parse_param(&par, argv, argc);
 	start_phil(&par);
 	return 0;
@@ -78,7 +81,7 @@ int philo(int argc, char **argv) // main
 
 int main() // del
 {
-	char *argv[] = {"phil", "4", "420", "200", "200", "22"};
-	philo(6, argv);
+	char *argv[] = {"phil", "200", "410", "200", "200", "22"};
+	philo(5, argv);
 	return 0;
 }

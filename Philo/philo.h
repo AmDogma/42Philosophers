@@ -14,6 +14,8 @@ typedef struct	s_phil
 	int				times;
 	int				prior;
 	unsigned long	timer;
+	unsigned long	begin;
+	pthread_mutex_t *check;
 	pthread_mutex_t *left;
 	pthread_mutex_t *right;
 	pthread_t		thread;
@@ -25,7 +27,8 @@ typedef struct	s_info
 	int				p_num;
 	int				ac;
 	char			**av;
-	pthread_mutex_t *check;
+	unsigned long	begin;
+	pthread_mutex_t check;
 	pthread_mutex_t *forks;
 	t_phil			*each;
 }	t_info;
@@ -33,3 +36,6 @@ typedef struct	s_info
 void			ft_error(char *message);
 unsigned long	msec_c(void);
 void			start_phil(t_info *par);
+void			smart_print(char *str, t_phil *each);
+void			smart_usleep(unsigned long start, unsigned long wait);
+void			smart_die(char *str, t_phil *each);

@@ -3,7 +3,7 @@ CC = gcc
 
 CFLAGS = -Wall -Werror -Wextra
 
-SRCS =	main.c start.c time.c
+SRCS =	main.c start.c utils.c
 
 OBJS = $(SRCS:.c=.o)
 

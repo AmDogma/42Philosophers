@@ -1,61 +1,49 @@
 #include "philo.h"
 
-void	slee(t_phil *phil)
+void	sleeping(t_phil *each)
 {
-	printf("Philo N%d sleeping\n", phil->name);
-	usleep(phil->sleep * 1000);
+	smart_print("is sleeping", each);
+	smart_usleep(msec_c(), (unsigned long)(each->sleep));
 }
 
-void	eat(t_phil *phil)
+void	eat(t_phil *each)
 {
-	pthread_mutex_lock(phil->left);
-	printf("Philo N%d has take left fork\n", phil->name);
-	pthread_mutex_lock(phil->right);
-	printf("Philo N%d has take right fork\n", phil->name);
-	if (msec_c() - phil->timer > (unsigned long)phil->die)
-	{
-		printf("Philo N%d DIED DIED DIED DIED DIED\n, time = %lu\n", phil->name, (msec_c() - phil->timer));
-		exit(1);
-	}
-	else
-		printf("Philo N%d NOt died, time = %lu\n", phil->name, (msec_c() - phil->timer));
-	phil->timer = msec_c();
-	printf("Philo N%d eating\n", phil->name);
-	usleep(phil->eat * 1000);
-	pthread_mutex_unlock(phil->left);
-	pthread_mutex_unlock(phil->right);
-}
+	pthread_mutex_lock(each->left);
+	smart_print("has taken a l_fork", each);
+	pthread_mutex_lock(each->right);
+	smart_print("has taken a r_fork", each);
+// monitoring
+	if ((msec_c() - each->timer) > (unsigned long)each->die)
+		smart_die("is died", each);
 
-void	think(t_phil *phil)
-{
-	printf("Philo N%d thinking\n", phil->name);
-//	◦ timestamp_in_ms X has taken a fork ◦ timestamp_in_ms X is eating
-//	◦ timestamp_in_ms X is sleeping
-//	◦ timestamp_in_ms X is thinking
-//	◦ timestamp_in_ms X died
+	smart_print("is eating", each);
+	each->timer = msec_c();
+	smart_usleep(msec_c(), (unsigned long)(each->eat));
+	pthread_mutex_unlock(each->left);
+	pthread_mutex_unlock(each->right);
+	smart_print("is thinking", each);
 }
 
 void	*routine(void *some)
 {
-	t_phil	*phil;
+	t_phil	*each;
 	int		i;
 
-	phil = (t_phil *)some;
+	each = (t_phil *)some;
 	i = 1;
-	if (phil->times)
+	if (each->times)
 	{
-		i = phil->times;
-		phil->times = 1;
+		i = each->times;
+		each->times = 1;
 	}
-	phil->timer = msec_c();
-	if (phil->name % 2 == 0)
-		usleep((phil->eat * 1000) - 2000);
+	each->timer = msec_c();
+	if (each->name % 2 == 0)
+		smart_usleep(msec_c(), (unsigned long)(each->eat));
 	while (i) // what first
 	{
-		eat(phil);
-		slee(phil);
-		think(phil);
-		i -= phil->times;
+		eat(each);
+		sleeping(each);
+		i -= each->times;
 	}
 	return NULL;
 }
@@ -67,14 +55,13 @@ void	start_phil(t_info *par)
 	i = -1;
 	while(par->p_num > ++i)
 	{
+		// нужно тут сделать смарт выход
 		if (pthread_create(&par->each[i].thread, NULL, &routine, (void *)(par->each + i)))
 			ft_error("Error: pthread_create");
-//		if (pthread_detach(par->each[i].thread))
-//			ft_error("Error: pthread_join");
-
 	}
 	while(--i > 0)
+		// нужно тут сделать смарт выход или вообще джойн не нужен пока работает мониторинг. или мониториг это поток еще один
 		if (pthread_join(par->each[i].thread, NULL))
-			ft_error("Error: pthread_join"); // понять как их отпустить и чтобы программа не закончилась
+			ft_error("Error: pthread_join");
 //	pthread_mutex_destroy(<#pthread_mutex_t * _Nonnull#>);
 }
