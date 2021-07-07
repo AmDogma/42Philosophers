@@ -4,6 +4,7 @@ void	sleeping(t_phil *each)
 {
 	smart_print("is sleeping", each);
 	smart_usleep(msec_c(), (unsigned long)(each->sleep));
+	smart_print("is thinking", each);
 }
 
 void	eat(t_phil *each)
@@ -12,16 +13,15 @@ void	eat(t_phil *each)
 	smart_print("has taken a l_fork", each);
 	pthread_mutex_lock(each->right);
 	smart_print("has taken a r_fork", each);
-// monitoring
-	if ((msec_c() - each->timer) > (unsigned long)each->die)
-		smart_die("is died", each);
-
 	smart_print("is eating", each);
+
+	pthread_mutex_lock(&each->death);
 	each->timer = msec_c();
+	pthread_mutex_unlock(&each->death);
+
 	smart_usleep(msec_c(), (unsigned long)(each->eat));
 	pthread_mutex_unlock(each->left);
 	pthread_mutex_unlock(each->right);
-	smart_print("is thinking", each);
 }
 
 void	*routine(void *some)
@@ -45,6 +45,7 @@ void	*routine(void *some)
 		sleeping(each);
 		i -= each->times;
 	}
+	pthread_mutex_lock(&each->death);
 	return NULL;
 }
 
@@ -57,11 +58,14 @@ void	start_phil(t_info *par)
 	{
 		// нужно тут сделать смарт выход
 		if (pthread_create(&par->each[i].thread, NULL, &routine, (void *)(par->each + i)))
-			ft_error("Error: pthread_create");
+			ft_error("Error: pthread_create"); // замена
+		if (pthread_create(&par->each[i].mon, NULL, &monitor, (void *)(par->each + i)))
+			ft_error("Error: pthread_create"); // замена
 	}
 	while(--i > 0)
-		// нужно тут сделать смарт выход или вообще джойн не нужен пока работает мониторинг. или мониториг это поток еще один
+	{
 		if (pthread_join(par->each[i].thread, NULL))
 			ft_error("Error: pthread_join");
+	}
 //	pthread_mutex_destroy(<#pthread_mutex_t * _Nonnull#>);
 }

@@ -19,12 +19,26 @@ unsigned long	msec_c(void)
 void smart_usleep(unsigned long start, unsigned long wait)
 {
 	while ((start + wait) > msec_c())
-		usleep(500);
+		usleep(600);
 }
 
-void smart_die(char *str, t_phil *each)
+void *monitor(void *some)
 {
-	pthread_mutex_lock(each->check);
-	printf("%lu, %d, %s. Out of %lu mseconds\n", msec_c() - each->begin, each->name, str, (unsigned long)(msec_c() - each->timer - each->die));
-	exit(1);
+	t_phil	*each;
+
+	each = (t_phil *)some;
+
+	while(each->name)
+	{
+		usleep(2000);
+		pthread_mutex_lock(&each->death);
+		if ((msec_c() - (unsigned long)each->timer) > (unsigned long)each->die)
+		{
+			pthread_mutex_lock(each->check);
+			printf("%lu, %d, is died. Out of %lu mseconds\n", msec_c() - each->begin, each->name, (unsigned long)(msec_c() - each->timer - each->die));
+			exit(1);
+		}
+		pthread_mutex_unlock(&each->death);
+	}
+	return NULL;
 }

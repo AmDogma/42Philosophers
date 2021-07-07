@@ -31,6 +31,7 @@ void init_phil(t_info *par, int i)
 	//		par->each[i].info = par; // + structure
 	par->each[i].name = i + 1;
 	par->each[i].check = &par->check;
+	pthread_mutex_init(&par->each[i].death, NULL);
 	par->each[i].die = ft_num(par->av[2]);
 	par->each[i].eat = ft_num(par->av[3]);
 	par->each[i].sleep = ft_num(par->av[4]);
@@ -81,7 +82,7 @@ int philo(int argc, char **argv) // main
 
 int main() // del
 {
-	char *argv[] = {"phil", "200", "410", "200", "200", "22"};
-	philo(5, argv);
+	char *argv[] = {"phil", "200", "415", "200", "200", "22"};
+	philo(6, argv);
 	return 0;
 }

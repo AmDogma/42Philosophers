@@ -16,9 +16,11 @@ typedef struct	s_phil
 	unsigned long	timer;
 	unsigned long	begin;
 	pthread_mutex_t *check;
+	pthread_mutex_t	death;
 	pthread_mutex_t *left;
 	pthread_mutex_t *right;
 	pthread_t		thread;
+	pthread_t		mon;
 //	struct s_info	*info;
 }	t_phil;
 
@@ -38,4 +40,4 @@ unsigned long	msec_c(void);
 void			start_phil(t_info *par);
 void			smart_print(char *str, t_phil *each);
 void			smart_usleep(unsigned long start, unsigned long wait);
-void			smart_die(char *str, t_phil *each);
+void			*monitor(void *some);
