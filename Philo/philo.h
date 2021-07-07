@@ -35,7 +35,7 @@ typedef struct	s_info
 }	t_info;
 
 void			ft_error(char *message);
-unsigned long	msec_c(void);
+unsigned long	ms_now(void);
 void			start_phil(t_info *par);
 void			smart_print(char *str, t_phil *each);
 void			smart_usleep(unsigned long start, unsigned long wait);
