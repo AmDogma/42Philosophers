@@ -3,23 +3,31 @@
 void smart_print(char *str, t_phil *each)
 {
 	pthread_mutex_lock(&each->info->check);
-	if (each->info->live == 1)
-		printf("%lu %d %s\n", ms_now() - each->info->begin, each->name, str);
+	if (each->info->is_act == 1)
+		printf("%llu %d %s\n", ms_now(each->info) - each->info->beg_time, each->name, str);
 	pthread_mutex_unlock(&each->info->check);
 }
 
-unsigned long	ms_now(void)
+unsigned long long	ms_now(t_info *info)
 {
-	struct timeval tv;
+	struct timeval		tv;
+	unsigned long long	msec;
 
 	if (gettimeofday(&tv, NULL))
-		ft_error("Error: gettimeofday");
-	return ((unsigned long)((tv.tv_sec * 1000) + (tv.tv_usec / 1000)));
+	{
+		pthread_mutex_lock(&info->check);
+		ft_exit(info);
+		info->is_act = 0;
+		pthread_mutex_unlock(&info->the_end);
+		usleep(10000);
+	}
+	msec = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (msec);
 }
 
-void smart_usleep(unsigned long start, unsigned long wait)
+void smart_usleep(unsigned long long start, int wait, t_info *info)
 {
-	while ((start + wait) > ms_now())
+	while ((start + (unsigned long long)wait) > ms_now(info))
 		usleep(500);
 }
 
@@ -43,18 +51,18 @@ void *monitor(void *some)
 	t_phil	*each;
 
 	each = (t_phil *)some;
-	while(each->info->live == 1)
+	while(each->info->is_act == 1)
 	{
 		usleep(1000);
 		pthread_mutex_lock(&each->death_ch);
-		if ((ms_now() - (unsigned long)each->last_eat) > (unsigned long)each->die)
+		if ((int)(ms_now(each->info) - each->last_eat) > each->info->die && each->info->is_act == 1)
 		{
 			pthread_mutex_lock(&each->info->check);
-			if (each->info->live)
-				printf("%lu %d is died. Out of %lu mseconds\n", ms_now() - each->info->begin, each->name, (unsigned long)(ms_now() - each->last_eat - each->die));
-			each->info->live = 0;
-			pthread_mutex_unlock(&each->info->the_end);
+			each->info->is_act = 0;
+			printf("%llu %d is died. Out of %llu mseconds\n", ms_now(each->info) - each->info->beg_time, each->name, (ms_now(each->info) - each->last_eat - each->info->die));
 			usleep(10000);
+			pthread_mutex_unlock(&each->info->the_end);
+			return (NULL);
 		}
 		pthread_mutex_unlock(&each->death_ch);
 	}

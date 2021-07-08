@@ -1,41 +1,34 @@
 #include "philo.h"
 
-void	ft_error(char *message) // убрать лишняя
+static int	ft_print(char *str) // убрать лишняя
 {
-	int	i;
-
-	i = 0;
-	while (message + i && message[i] != '\0')
-		write(1, (message + i++), 1);
-	write(1, "\n", 1);
+	printf("%s\n", str);
+	return(-1);
 }
 
-int ft_num(char *num)
+static int ft_num(char *num)
 {
-	int i;
+	long long i;
 
 	i = 0;
 	while (*num >= '0' && *num <= '9')
 	{
 		i = (i * 10) + (*num - '0');
 		num++;
+		if (i > 2147483647 || i < 0)
+			return(0);
 	}
 	if (*num || !i)
-		ft_error("Error: Wrong arguments");
-	return(i);
+		return(0);
+	return ((int)i);
 }
 
 void init_phil(t_info *info, int i)
 {
 	info->each[i].name = i + 1;
-	pthread_mutex_init(&info->each[i].death_ch, NULL);
 	info->each[i].info = info;
-	info->each[i].die = ft_num(info->av[2]);
-	info->each[i].eat = ft_num(info->av[3]); // проверить меньше 60
-	info->each[i].sleep = ft_num(info->av[4]);
-	info->each[i].h_many = 0;
-	if (info->ac == 6)
-		info->each[i].h_many = ft_num(info->av[5]);
+	info->each[i].h_many_each = info->h_many;
+	pthread_mutex_init(&info->each[i].death_ch, NULL);
 	pthread_mutex_init(info->forks + i, NULL);
 	info->each[i].left = info->forks + i;
 	if (info->p_num != i + 1)
@@ -44,44 +37,50 @@ void init_phil(t_info *info, int i)
 		info->each[i].right = info->forks;
 }
 
-void parse_param(t_info *info, char **argv, int argc)
+static int parse_param(t_info *info)
 {
 	int i;
 
-	i = -1;
-	info->p_num = ft_num(argv[1]);
-	info->ac = argc;
-	info->av = argv;
-	info->live = 1;
+	i = 0;
+	info->is_act = 1;
 	info->each = (t_phil *)malloc(sizeof(t_phil) * info->p_num);
 	info->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * info->p_num);
 	if (!info->each || !info->forks)
-		ft_error("Error: malloc");
+		return(ft_print("Error: malloc"));
 	pthread_mutex_init(&info->check, NULL);
-	info->begin = ms_now();
-	while (info->p_num > ++i)
-		init_phil(info, i);
-
+	while (info->p_num > i)
+		init_phil(info, i++);
+	info->beg_time = ms_now(info);
+	return (0);
 }
 
 int philo(int argc, char **argv) // main
 {
-	t_info par;
+	t_info 			info;
 
+	info.h_many = 0;
 	if (argc < 5 || argc > 6)
-		ft_error("Error: Wrong number of arguments");
-	parse_param(&par, argv, argc);
-	start_phil(&par);
-	pthread_mutex_lock(&par.the_end);
-	ft_exit(&par);
-	pthread_mutex_destroy(&par.the_end);
+		return(ft_print("Error: Wrong number of arguments"));
+	info.p_num = ft_num(argv[1]);
+	info.die = ft_num(argv[2]);
+	info.eat = ft_num(argv[3]);
+	info.sleep = ft_num(argv[4]);
+	if (argc == 6)
+		info.h_many = ft_num(argv[5]);
+	if (info.p_num > 300 || !info.p_num || info.die < 60 || info.eat < 60 || info.sleep < 60 || (argc == 6 && !info.h_many))
+		return(ft_print("Error: Wrong arguments"));
+	if (parse_param(&info))
+		return (-1);
+	start_phil(&info);
+	pthread_mutex_lock(&info.the_end);
+	ft_exit(&info);
+	pthread_mutex_destroy(&info.the_end);
 	return 0;
 }
 
 int main() // del
 {
-	char *argv[] = {"phil", "188", "409", "200", "200", "11"};
-	philo(6, argv);
-
+	char *argv[] = {"phil", "22", "401", "200", "200", "11"};
+	philo(5, argv);
 	return 0;
 }
