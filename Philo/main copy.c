@@ -55,7 +55,7 @@ static int	parse_param(t_info *info)
 	return (0);
 }
 
-int	main(int argc, char **argv)
+int	philo(int argc, char **argv) // main
 {
 	t_info	info;
 
@@ -77,5 +77,12 @@ int	main(int argc, char **argv)
 	pthread_mutex_lock(&info.the_end);
 	ft_exit(&info);
 	pthread_mutex_destroy(&info.the_end);
+	return (0);
+}
+
+int main() // del
+{
+	char *argv[] = {"phil", "22", "402", "200", "200", "11"};
+	philo(5, argv);
 	return (0);
 }

@@ -1,13 +1,5 @@
 #include "philo.h"
 
-void smart_print(char *str, t_phil *each)
-{
-	pthread_mutex_lock(&each->info->check);
-	if (each->info->is_act == 1)
-		printf("%llu %d %s\n", ms_now(each->info) - each->info->beg_time, each->name, str);
-	pthread_mutex_unlock(&each->info->check);
-}
-
 unsigned long long	ms_now(t_info *info)
 {
 	struct timeval		tv;
@@ -25,18 +17,18 @@ unsigned long long	ms_now(t_info *info)
 	return (msec);
 }
 
-void smart_usleep(unsigned long long start, int wait, t_info *info)
+void	smart_usleep(unsigned long long start, int wait, t_info *info)
 {
 	while ((start + (unsigned long long)wait) > ms_now(info))
 		usleep(500);
 }
 
-void ft_exit(t_info *info)
+void	ft_exit(t_info *info)
 {
 	int	i;
 
 	i = info->p_num;
-	while(i--)
+	while (i--)
 	{
 		pthread_mutex_destroy(&info->forks[i]);
 		pthread_mutex_destroy(&info->each[i].death_ch);
@@ -46,20 +38,23 @@ void ft_exit(t_info *info)
 	free(info->each);
 }
 
-void *monitor(void *some)
+void	*monitor(void *some)
 {
 	t_phil	*each;
 
 	each = (t_phil *)some;
-	while(each->info->is_act == 1)
+	while (each->info->is_act == 1)
 	{
 		usleep(1000);
 		pthread_mutex_lock(&each->death_ch);
-		if ((int)(ms_now(each->info) - each->last_eat) > each->info->die && each->info->is_act == 1)
+		if ((int)(ms_now(each->info) - each->last_eat) > each->info->die
+				&& each->info->is_act == 1)
 		{
 			pthread_mutex_lock(&each->info->check);
 			each->info->is_act = 0;
-			printf("%llu %d is died. Out of %llu mseconds\n", ms_now(each->info) - each->info->beg_time, each->name, (ms_now(each->info) - each->last_eat - each->info->die));
+			printf("%llu %d is died. Out of %llu ms\n", ms_now(each->info)
+				- each->info->beg_time, each->name,
+				(ms_now(each->info) - each->last_eat - each->info->die));
 			usleep(10000);
 			pthread_mutex_unlock(&each->info->the_end);
 			return (NULL);
