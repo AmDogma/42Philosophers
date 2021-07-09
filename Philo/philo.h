@@ -12,6 +12,7 @@ typedef struct s_phil
 {
 	int					name;
 	int					h_many_each;
+	int					living;
 	unsigned long long	last_eat;
 	pthread_mutex_t		death_ch;
 	pthread_mutex_t		*left;
@@ -37,10 +38,10 @@ typedef struct s_info
 }	t_info;
 
 unsigned long long	ms_now(t_info *info);
-void				start_phil(t_info *par);
+void				start_phil(t_info *info);
+int					print_err(char *str, t_info *info);
+void				*monitor(void *some);
 void				smart_usleep(unsigned long long start, int wait,
 						 t_info *info);
-void				*monitor(void *some);
-void				ft_exit(t_info *info);
 
 #endif

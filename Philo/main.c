@@ -1,9 +1,18 @@
 #include "philo.h"
 
-static int	ft_print(char *str)
+static void	ft_exit(t_info *info)
 {
-	printf("%s\n", str);
-	return (-1);
+	int	i;
+
+	i = info->p_num;
+	usleep(info->die);
+	while (i--)
+		pthread_mutex_destroy(&info->forks[i]);
+	pthread_mutex_destroy(&info->check);
+	if (info->forks)
+		free(info->forks);
+	if (info->each)
+		free(info->each);
 }
 
 static int	ft_num(char *num)
@@ -15,10 +24,10 @@ static int	ft_num(char *num)
 	{
 		i = (i * 10) + (*num - '0');
 		num++;
-		if (i > 2147483647 || i < 0)
+		if (i > INT_MAX || i < 0)
 			return (0);
 	}
-	if (*num || !i)
+	if (*num)
 		return (0);
 	return ((int)i);
 }
@@ -26,9 +35,9 @@ static int	ft_num(char *num)
 static void	init_phil(t_info *info, int i)
 {
 	info->each[i].name = i + 1;
+	info->each[i].living = 1;
 	info->each[i].info = info;
 	info->each[i].h_many_each = info->h_many;
-	pthread_mutex_init(&info->each[i].death_ch, NULL);
 	pthread_mutex_init(info->forks + i, NULL);
 	info->each[i].left = info->forks + i;
 	if (info->p_num != i + 1)
@@ -47,7 +56,7 @@ static int	parse_param(t_info *info)
 	info->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
 			* info->p_num);
 	if (!info->each || !info->forks)
-		return (ft_print("Error: malloc"));
+		return (print_err("Error: malloc", info));
 	pthread_mutex_init(&info->check, NULL);
 	while (info->p_num > i)
 		init_phil(info, i++);
@@ -59,9 +68,9 @@ int	main(int argc, char **argv)
 {
 	t_info	info;
 
-	info.h_many = 0;
+	info.h_many = -1;
 	if (argc < 5 || argc > 6)
-		return (ft_print("Error: Wrong number of arguments"));
+		return (print_err("Error: Wrong number of arguments", &info));
 	info.p_num = ft_num(argv[1]);
 	info.die = ft_num(argv[2]);
 	info.eat = ft_num(argv[3]);
@@ -69,13 +78,10 @@ int	main(int argc, char **argv)
 	if (argc == 6)
 		info.h_many = ft_num(argv[5]);
 	if (info.p_num > 300 || !info.p_num || info.die < 60 || info.eat < 60
-		|| info.sleep < 60 || (argc == 6 && !info.h_many))
-		return (ft_print("Error: Wrong arguments"));
-	if (parse_param(&info))
-		return (-1);
+		|| info.sleep < 60 || !info.h_many)
+		return (print_err("Error: Wrong arguments", &info));
+	parse_param(&info);
 	start_phil(&info);
-	pthread_mutex_lock(&info.the_end);
 	ft_exit(&info);
-	pthread_mutex_destroy(&info.the_end);
 	return (0);
 }
