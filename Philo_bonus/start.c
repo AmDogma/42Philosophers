@@ -2,37 +2,41 @@
 
 static void	smart_print(char *str, t_phil *each)
 {
-	pthread_mutex_lock(&each->info->check);
+	sem_wait(each->info->check);
 	if (each->info->is_act == 1)
 		printf("%llu %d %s\n", ms_now(each->info) - each->info->beg_time,
 			each->name, str);
-	pthread_mutex_unlock(&each->info->check);
+	sem_post(each->info->check);
 }
 
-static void	action(t_phil *each)
+static void	daily(t_phil *each)
 {
-	pthread_mutex_lock(each->left);
-	smart_print("has taken a l_fork", each);
-	pthread_mutex_lock(each->right);
-	smart_print("has taken a r_fork", each);
-	pthread_mutex_lock(&each->info->check);
+	sem_wait(each->info->forks);
+	smart_print("has taken a fork", each);
+
+	sem_wait(each->info->forks);
+	smart_print("has taken a fork", each);
+	
+	sem_wait(each->info->check);
 	each->last_eat = ms_now(each->info);
-	pthread_mutex_unlock(&each->info->check);
+	sem_post(each->info->check);
+
 	smart_print("is eating", each);
 	smart_usleep(ms_now(each->info), each->info->eat, each->info);
-	pthread_mutex_unlock(each->left);
-	pthread_mutex_unlock(each->right);
+
+	sem_post(each->info->forks);
+	sem_post(each->info->forks);
+
 	smart_print("is sleeping", each);
 	smart_usleep(ms_now(each->info), each->info->sleep, each->info);
 	smart_print("is thinking", each);
+	
 }
 
-static void	*routine(void *some)
+static void	routine(t_phil	*each)
 {
-	t_phil	*each;
 	int		i;
 
-	each = (t_phil *)some;
 	i = 1;
 	if (each->h_many_each == -1)
 		i = 0;
@@ -41,28 +45,36 @@ static void	*routine(void *some)
 		smart_usleep(ms_now(each->info), (each->info->eat), each->info);
 	while (each->h_many_each && each->info->is_act == 1)
 	{
-		action(each);
+		daily(each);
 		each->h_many_each -= i;
 	}
-	pthread_mutex_lock(&each->info->check);
+	sem_wait(each->info->check);
 	each->living = 0;
-	pthread_mutex_unlock(&each->info->check);
-	return (NULL);
+	sem_post(each->info->check);
+	printf("\ndone PHIL N%d\n", each->name);
+	exit (1);
 }
 
 void	start_phil(t_info *info)
 {
 	int	i;
+	pid_t pid;
 
 	i = -1;
 	while (info->p_num > ++i)
 	{
-		if (pthread_create(&info->each[i].thread, NULL, &routine,
-				(void *)(info->each + i)) || pthread_create(&info->each[i].mon,
+		pid = fork();
+		if (pid < 0)
+			print_err("Error: can't make fork", info);
+		else if (!pid)
+			routine(info->each + i);
+	}
+	i = -1;
+	while (info->p_num > ++i)
+	{
+		if (pthread_create(&info->each[i].mon,
 				NULL, &monitor, (void *)(info->each + i)))
 			print_err("Error: pthread_create\n", info);
-		if (pthread_detach(info->each[i].thread))
-			print_err("Error: pthread_detach\n", info);
 	}
 	while (i--)
 		if (pthread_join(info->each[i].mon, NULL))

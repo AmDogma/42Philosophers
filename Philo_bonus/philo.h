@@ -7,6 +7,8 @@
 # include <sys/time.h>
 # include <pthread.h>
 # include <limits.h>
+# include <fcntl.h>
+# include <semaphore.h>
 
 typedef struct s_phil
 {
@@ -14,8 +16,6 @@ typedef struct s_phil
 	int					h_many_each;
 	int					living;
 	unsigned long long	last_eat;
-	pthread_mutex_t		*left;
-	pthread_mutex_t		*right;
 	pthread_t			thread;
 	pthread_t			mon;
 	struct s_info		*info;
@@ -30,8 +30,8 @@ typedef struct s_info
 	int					h_many;
 	int					is_act;
 	unsigned long long	beg_time;
-	pthread_mutex_t		*forks;
-	pthread_mutex_t		check;
+	sem_t				*forks;
+	sem_t				*check;
 	pthread_mutex_t		the_end;
 	t_phil				*each;
 }	t_info;
