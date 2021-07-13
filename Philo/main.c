@@ -60,7 +60,7 @@ static int	parse_param(t_info *info)
 	pthread_mutex_init(&info->check, NULL);
 	while (info->p_num > i)
 		init_phil(info, i++);
-	info->beg_time = ms_now(info);
+	info->beg_time = ms_now();
 	return (0);
 }
 

@@ -36,11 +36,10 @@ typedef struct s_info
 	t_phil				*each;
 }	t_info;
 
-unsigned long long	ms_now(t_info *info);
+unsigned long long	ms_now(void);
 void				start_phil(t_info *info);
 int					print_err(char *str, t_info *info);
 void				*monitor(void *some);
-void				smart_usleep(unsigned long long start, int wait,
-						 t_info *info);
+void				smart_usleep(unsigned long long start, int wait);
 
 #endif

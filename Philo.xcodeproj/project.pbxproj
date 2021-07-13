@@ -31,6 +31,7 @@
 		241C4CC1268FA48200E156FA /* start.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = start.c; sourceTree = "<group>"; };
 		242BAEE6268E52C400F4BBEE /* Philo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Philo; sourceTree = BUILT_PRODUCTS_DIR; };
 		242BAEF0268E564700F4BBEE /* philo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = philo.h; sourceTree = "<group>"; };
+		2435DB7A269A3A4100A4F852 /* Philo_bonus */ = {isa = PBXFileReference; lastKnownFileType = text; path = Philo_bonus; sourceTree = SOURCE_ROOT; };
 		245194B02693942D00AE1942 /* utils.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		2475496A26921FF200ED26FA /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -70,6 +71,7 @@
 				241C4CC1268FA48200E156FA /* start.c */,
 				245194B02693942D00AE1942 /* utils.c */,
 				2475496A26921FF200ED26FA /* Makefile */,
+				2435DB7A269A3A4100A4F852 /* Philo_bonus */,
 			);
 			path = Philo;
 			sourceTree = "<group>";

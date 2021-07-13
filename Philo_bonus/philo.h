@@ -9,15 +9,16 @@
 # include <limits.h>
 # include <fcntl.h>
 # include <semaphore.h>
+# include <signal.h>
+# include <sys/wait.h>
 
 typedef struct s_phil
 {
 	int					name;
 	int					h_many_each;
-	int					living;
 	unsigned long long	last_eat;
-	pthread_t			thread;
 	pthread_t			mon;
+	pid_t				pid;
 	struct s_info		*info;
 }	t_phil;
 
@@ -32,15 +33,14 @@ typedef struct s_info
 	unsigned long long	beg_time;
 	sem_t				*forks;
 	sem_t				*check;
-	pthread_mutex_t		the_end;
 	t_phil				*each;
 }	t_info;
 
-unsigned long long	ms_now(t_info *info);
+unsigned long long	ms_now(void);
 void				start_phil(t_info *info);
 int					print_err(char *str, t_info *info);
-void				*monitor(void *some);
-void				smart_usleep(unsigned long long start, int wait,
-						 t_info *info);
+void				monitor(t_phil	*each);
+void				smart_usleep(unsigned long long start, int wait);
+void				*routine(void *some);
 
 #endif

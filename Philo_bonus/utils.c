@@ -1,23 +1,18 @@
 #include "philo.h"
 
-unsigned long long	ms_now(t_info *info)
+unsigned long long	ms_now(void)
 {
 	struct timeval		tv;
 	unsigned long long	msec;
 
-	msec = info->beg_time;
 	gettimeofday(&tv, NULL);
 	msec = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (msec);
 }
 
-void	smart_usleep(unsigned long long start, int wait, t_info *info)
+void	smart_usleep(unsigned long long start, int wait)
 {
-	sem_wait(info->check);
-	if (info->is_act == 0)
-		start = ms_now(info);
-	sem_post(info->check);
-	while ((start + (unsigned long long)wait) > ms_now(info))
+	while ((start + (unsigned long long)wait) > ms_now())
 		usleep(500);
 }
 
@@ -30,24 +25,30 @@ int	print_err(char *str, t_info *info)
 	return (-1);
 }
 
-void	*monitor(void *some)
+void	monitor(t_phil	*each)
 {
-	t_phil	*each;
-
-	each = (t_phil *)some;
-	while (each->info->is_act == 1 && each->living == 1)
+	sem_wait(each->info->check);
+	if (pthread_create(&each->mon,
+			NULL, &routine, (void *)(each)))
+		print_err("Error: pthread_create\n", each->info);
+	if (pthread_detach(each->mon))
+		print_err("Error: pthread_join\n", each->info);
+	while (each->info->is_act == 1)
 	{
 		usleep(1000);
 		sem_wait(each->info->check);
-		if ((int)(ms_now(each->info) - each->last_eat) > each->info->die
-				&& each->info->is_act == 1 && each->living == 1)
+		if ((int)(ms_now() - each->last_eat) > each->info->die
+			&& each->info->is_act == 1)
 		{
 			each->info->is_act = 0;
-			printf("%llu %d is died. Out of %llu ms\n", ms_now(each->info)
+			printf("%llu %d is died. Out of %llu ms\n", ms_now()
 				- each->info->beg_time, each->name,
-				(ms_now(each->info) - each->last_eat - each->info->die));
+				(ms_now() - each->last_eat - each->info->die));
+			sem_close(each->info->check);
+			exit (2);
 		}
-		sem_post(each->info->check);
+		else
+			sem_post(each->info->check);
 	}
-	return (NULL);
+	exit (1);
 }
