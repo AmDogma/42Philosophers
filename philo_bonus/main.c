@@ -3,14 +3,26 @@
 static void	ft_exit(t_info *info)
 {
 	int	i;
+	int	stat;
 
-	i = info->p_num;
-	usleep(info->die);
-	while (i--)
-		pthread_mutex_destroy(&info->forks[i]);
-	pthread_mutex_destroy(&info->check);
-	if (info->forks)
-		free(info->forks);
+	i = 0;
+	while (info->p_num > i)
+	{
+		waitpid(-1, &stat, WUNTRACED);
+		if (WIFEXITED(stat))
+		{
+			stat = WEXITSTATUS(stat);
+			if (stat == 2)
+				break ;
+			else
+				i++;
+		}
+	}
+	i = -1;
+	while (info->p_num > ++i)
+		kill(info->each[i].pid, SIGTERM);
+	sem_close(info->forks);
+	sem_close(info->check);
 	if (info->each)
 		free(info->each);
 }
@@ -35,15 +47,8 @@ static int	ft_num(char *num)
 static void	init_phil(t_info *info, int i)
 {
 	info->each[i].name = i + 1;
-	info->each[i].living = 1;
 	info->each[i].info = info;
 	info->each[i].h_many_each = info->h_many;
-	pthread_mutex_init(info->forks + i, NULL);
-	info->each[i].left = info->forks + i;
-	if (info->p_num != i + 1)
-		info->each[i].right = info->forks + i + 1;
-	else
-		info->each[i].right = info->forks;
 }
 
 static int	parse_param(t_info *info)
@@ -51,13 +56,13 @@ static int	parse_param(t_info *info)
 	int	i;
 
 	i = 0;
-	info->is_act = 1;
+	sem_unlink("/check");
+	sem_unlink("/forks");
+	info->forks = sem_open("/forks", O_CREAT | O_EXCL, 0644, info->p_num);
+	info->check = sem_open("/check", O_CREAT | O_EXCL, 0644, 1);
 	info->each = (t_phil *)malloc(sizeof(t_phil) * info->p_num);
-	info->forks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t)
-			* info->p_num);
-	if (!info->each || !info->forks)
+	if (!info->each)
 		return (print_err("Error: malloc", info));
-	pthread_mutex_init(&info->check, NULL);
 	while (info->p_num > i)
 		init_phil(info, i++);
 	info->beg_time = ms_now();
@@ -68,6 +73,7 @@ int	main(int argc, char **argv)
 {
 	t_info	info;
 
+	info.is_act = 1;
 	info.h_many = -1;
 	if (argc < 5 || argc > 6)
 		return (print_err("Error: Wrong number of arguments", &info));

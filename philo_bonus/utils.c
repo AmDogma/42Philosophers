@@ -18,31 +18,37 @@ void	smart_usleep(unsigned long long start, int wait)
 
 int	print_err(char *str, t_info *info)
 {
-	pthread_mutex_lock(&info->check);
+	sem_wait(info->check);
 	info->is_act = 0;
-	pthread_mutex_unlock(&info->check);
+	sem_post(info->check);
 	printf("%s\n", str);
 	return (-1);
 }
 
-void	*monitor(void *some)
+void	monitor(t_phil	*each)
 {
-	t_phil	*each;
-
-	each = (t_phil *)some;
-	while (each->info->is_act == 1 && each->living == 1)
+	sem_wait(each->info->check);
+	if (pthread_create(&each->mon,
+			NULL, &routine, (void *)(each)))
+		print_err("Error: pthread_create\n", each->info);
+	if (pthread_detach(each->mon))
+		print_err("Error: pthread_join\n", each->info);
+	while (each->info->is_act == 1)
 	{
 		usleep(1000);
-		pthread_mutex_lock(&each->info->check);
+		sem_wait(each->info->check);
 		if ((int)(ms_now() - each->last_eat) > each->info->die
-				&& each->info->is_act == 1 && each->living == 1)
+			&& each->info->is_act == 1)
 		{
 			each->info->is_act = 0;
 			printf("%llu %d is died. Out of %llu ms\n", ms_now()
 				- each->info->beg_time, each->name,
 				(ms_now() - each->last_eat - each->info->die));
+			sem_close(each->info->check);
+			exit (2);
 		}
-		pthread_mutex_unlock(&each->info->check);
+		else
+			sem_post(each->info->check);
 	}
-	return (NULL);
+	exit (1);
 }

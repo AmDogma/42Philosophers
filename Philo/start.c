@@ -4,26 +4,26 @@ static void	smart_print(char *str, t_phil *each)
 {
 	pthread_mutex_lock(&each->info->check);
 	if (each->info->is_act == 1)
-		printf("%llu %d %s\n", ms_now(each->info) - each->info->beg_time,
+		printf("%llu %d %s\n", ms_now() - each->info->beg_time,
 			each->name, str);
 	pthread_mutex_unlock(&each->info->check);
 }
 
-static void	eat(t_phil *each)
+static void	action(t_phil *each)
 {
 	pthread_mutex_lock(each->left);
 	smart_print("has taken a l_fork", each);
 	pthread_mutex_lock(each->right);
 	smart_print("has taken a r_fork", each);
 	pthread_mutex_lock(&each->info->check);
-	each->last_eat = ms_now(each->info);
+	each->last_eat = ms_now();
 	pthread_mutex_unlock(&each->info->check);
 	smart_print("is eating", each);
-	smart_usleep(ms_now(each->info), each->info->eat, each->info);
+	smart_usleep(ms_now(), each->info->eat);
 	pthread_mutex_unlock(each->left);
 	pthread_mutex_unlock(each->right);
 	smart_print("is sleeping", each);
-	smart_usleep(ms_now(each->info), each->info->sleep, each->info);
+	smart_usleep(ms_now(), each->info->sleep);
 	smart_print("is thinking", each);
 }
 
@@ -36,12 +36,12 @@ static void	*routine(void *some)
 	i = 1;
 	if (each->h_many_each == -1)
 		i = 0;
-	each->last_eat = ms_now(each->info);
+	each->last_eat = ms_now();
 	if (each->name % 2 == 0)
-		smart_usleep(ms_now(each->info), (each->info->eat), each->info);
+		smart_usleep(ms_now(), (each->info->eat));
 	while (each->h_many_each && each->info->is_act == 1)
 	{
-		eat(each);
+		action(each);
 		each->h_many_each -= i;
 	}
 	pthread_mutex_lock(&each->info->check);
