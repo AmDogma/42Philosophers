@@ -16,6 +16,8 @@
 ./philo number_philosopher time_to_die time_to_eat time_to_sleep each_must_eat(not required)
 Или просто введите ./philo 20 440 200 200 200 
 
+Обратите внимание, что при работе данной программы может произойти залипание на другой процесс, если вы выполняете другую программу. Например zoom. В таком случае система забирает на себя часть времени и философы могут умереть.
+
 ## Информация
 
 * [Parallel Computing](https://computing.llnl.gov/tutorials/parallel_comp/)
